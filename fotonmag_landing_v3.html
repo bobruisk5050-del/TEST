@@ -21,17 +21,18 @@
     /* ── SCROLL ANIMATION ── */
     .reveal {
       opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(30px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
     }
     .reveal.visible {
       opacity: 1;
       transform: translateY(0);
     }
-    .reveal-delay-1 { transition-delay: 0.08s; }
-    .reveal-delay-2 { transition-delay: 0.16s; }
-    .reveal-delay-3 { transition-delay: 0.24s; }
-    .reveal-delay-4 { transition-delay: 0.32s; }
+    /* Задержки тоже сделали чуть более размеренными */
+    .reveal-delay-1 { transition-delay: 0.15s; }
+    .reveal-delay-2 { transition-delay: 0.30s; }
+    .reveal-delay-3 { transition-delay: 0.45s; }
+    .reveal-delay-4 { transition-delay: 0.60s; }
 
     /* ── NAV ── */
     .nav {
@@ -384,24 +385,33 @@
   const nav = document.getElementById('nav');
   const backTop = document.getElementById('backTop');
 
-  // Улучшенная функция: сбрасывает и перезапускает анимацию появления
+  // Улучшенная и смягченная функция скролла
   function scrollToSection(id) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    const offset = 60; // Высота шапки верхнего меню
+    const offset = 60; 
     const top = el.getBoundingClientRect().top + window.scrollY - offset;
 
-    // Ищем все анимируемые элементы внутри нужного раздела
     const reveals = el.querySelectorAll('.reveal');
 
-    // Моментально скрываем элементы без плавного перехода на время прокрутки
+    // Прячем элементы без плавности
     reveals.forEach(r => {
       r.style.transition = 'none';
       r.classList.remove('visible');
-      void r.offsetHeight; // Форсируем перерисовку в браузере (reflow)
-      r.style.transition = ''; // Возвращаем стили плавности
+      void r.offsetHeight; 
+      r.style.transition = ''; 
     });
+
+    // Начинаем плавный скролл
+    window.scrollTo({ top, behavior: 'smooth' });
+
+    // Увеличили задержку до 600мс!
+    // Теперь элементы ждут, пока страница докрутится, и только потом мягко всплывают
+    setTimeout(() => {
+      reveals.forEach(r => r.classList.add('visible'));
+    }, 600); 
+  }
 
     // Начинаем скролл к секции
     window.scrollTo({ top, behavior: 'smooth' });
