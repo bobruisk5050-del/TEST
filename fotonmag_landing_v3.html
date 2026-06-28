@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>FotonMag — постеры с QR-кодом</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF1493' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M23 19C23 20.1046 22.1046 21 21 21H3C1.89543 21 1 20.1046 1 19V8C1 6.89543 1.89543 6 3 6H7L9 3H15L17 6H21C22.1046 6 23 6.89543 23 8V19Z'/><circle cx='12' cy='13' r='4'/></svg>">
   <style>
     :root {
       --pink: #FF1493;
@@ -17,174 +18,452 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Arial', sans-serif; background: var(--cream); color: var(--text-body); overflow-x: hidden; }
 
-    /* ── SOFT ANIMATION ── */
+    /* ── SCROLL ANIMATION ── */
     .reveal {
       opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      transform: translateY(40px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .reveal.visible {
       opacity: 1;
       transform: translateY(0);
     }
-    .reveal-delay-1 { transition-delay: 0.15s; }
-    .reveal-delay-2 { transition-delay: 0.30s; }
-    .reveal-delay-3 { transition-delay: 0.45s; }
-    .reveal-delay-4 { transition-delay: 0.60s; }
+    .reveal-delay-1 { transition-delay: 0.08s; }
+    .reveal-delay-2 { transition-delay: 0.16s; }
+    .reveal-delay-3 { transition-delay: 0.24s; }
+    .reveal-delay-4 { transition-delay: 0.32s; }
 
     /* ── NAV ── */
     .nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(255,255,255,0.96); backdrop-filter: blur(8px);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(8px);
       border-bottom: 1.5px solid var(--pink-muted);
-      transform: translateY(-100%); transition: transform 0.3s ease;
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
     }
     .nav.visible { transform: translateY(0); }
     .nav-inner {
       max-width: 760px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px; height: 52px; gap: 8px;
+      padding: 0 16px; height: 52px;
+      gap: 8px;
     }
-    .nav-logo { font-size: 1rem; font-weight: 900; color: var(--pink); cursor: pointer; text-transform: uppercase; }
-    .nav-links { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; justify-content: flex-end; }
+    .nav-logo {
+      font-size: 1rem; font-weight: 900; color: var(--pink);
+      letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+      cursor: pointer;
+    }
+    .nav-links {
+      display: flex; gap: 4px; overflow-x: auto;
+      scrollbar-width: none; flex: 1; justify-content: flex-end;
+    }
     .nav-links::-webkit-scrollbar { display: none; }
     .nav-link {
       font-size: 0.72rem; font-weight: 700; color: var(--text-muted-custom);
-      text-transform: uppercase; padding: 6px 10px; border-radius: 20px;
-      cursor: pointer; border: none; background: transparent; white-space: nowrap;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 6px 10px; border-radius: 20px;
+      cursor: pointer; white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
+      border: none; background: transparent;
     }
     .nav-link:hover, .nav-link.active { background: var(--pink-muted); color: var(--pink); }
 
-    /* ── SECTIONS & COMPONENTS ── */
-    .section { padding: 64px 20px; max-width: 760px; margin: 0 auto; }
-    .section-title { font-size: clamp(1.4rem, 5vw, 2rem); color: var(--pink); text-align: center; margin-bottom: 30px; font-weight: 800; text-transform: uppercase; }
-    .hero { background: var(--pink); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; color: #fff; }
-    .btn-white { display:inline-block; background:#fff; color:var(--pink); font-weight:700; padding:15px 38px; border-radius:50px; text-decoration:none; margin-top:20px; }
-    
-    .what-card, .how-step, .price-card, .order-step { background: #fff; border: 1.5px solid var(--pink-muted); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-    .order-section { background: var(--pink); padding: 64px 20px; color: #fff; }
-    
-    .faq-item { border-bottom: 1.5px solid var(--pink-muted); padding: 16px 0; }
-    .faq-q { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; }
-    .faq-a { display: none; margin-top: 10px; color: var(--text-muted-custom); }
-    .faq-a.visible { display: block; }
-    
-    .copied-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #3a1a2e; color: #fff; padding: 10px 22px; border-radius: 30px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 1000; }
-    .copied-toast.show { opacity: 1; }
+    /* ── BACK TO TOP ── */
+    .back-top {
+      position: fixed;
+      bottom: 24px; right: 20px;
+      width: 46px; height: 46px;
+      background: var(--pink);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      opacity: 0; pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 99;
+      border: none;
+      box-shadow: 0 4px 16px rgba(255,20,147,0.35);
+    }
+    .back-top.show { opacity: 1; pointer-events: all; transform: translateY(0); }
+    .back-top:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(255,20,147,0.4); }
+    .back-top svg { width: 20px; height: 20px; }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--pink);
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 40px 20px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before { content:''; position:absolute; top:-80px; right:-80px; width:320px; height:320px; border-radius:50%; background:rgba(255,255,255,0.07); pointer-events:none; }
+    .hero::after { content:''; position:absolute; bottom:-60px; left:-60px; width:240px; height:240px; border-radius:50%; background:rgba(255,255,255,0.05); pointer-events:none; }
+    .hero-logo { margin-bottom: 20px; }
+    .hero-logo svg { width: 72px; height: 72px; }
+    .hero-badge { display:inline-block; background:rgba(255,255,255,0.18); color:#fff; font-size:0.8rem; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:5px 14px; border-radius:20px; margin-bottom:16px; border:1px solid rgba(255,255,255,0.3); }
+    .hero-title { font-size:clamp(2.4rem,9vw,5rem); font-weight:900; color:#fff; letter-spacing:2px; text-transform:uppercase; line-height:1.1; margin-bottom:18px; }
+    .hero-sub { font-size:clamp(1rem,3.5vw,1.25rem); color:rgba(255,255,255,0.92); max-width:520px; line-height:1.5; margin-bottom:36px; }
+    .btn-white { display:inline-block; background:#fff; color:var(--pink); font-weight:700; font-size:1rem; padding:15px 38px; border-radius:50px; text-decoration:none; transition:transform 0.2s,box-shadow 0.2s; box-shadow:0 4px 20px rgba(0,0,0,0.12); }
+    .btn-white:hover { transform:translateY(-2px) scale(1.04); box-shadow:0 8px 28px rgba(0,0,0,0.16); }
+    .btn-tg { display:inline-block; background:#fff; color:#229ED9; font-weight:700; font-size:1rem; padding:15px 38px; border-radius:50px; text-decoration:none; transition:transform 0.2s,box-shadow 0.2s; box-shadow:0 4px 20px rgba(0,0,0,0.12); }
+    .btn-tg:hover { transform:translateY(-2px) scale(1.04); }
+    .scroll-hint { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:4px; color:rgba(255,255,255,0.6); font-size:0.72rem; letter-spacing:1px; text-transform:uppercase; cursor:pointer; }
+    .scroll-hint svg { animation:bounce 1.6s infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(6px)} }
+
+    /* ── SECTIONS ── */
+    .section { padding:64px 20px; max-width:760px; margin:0 auto; }
+    .section-title { font-size:clamp(1.4rem,5vw,2rem); font-weight:800; color:var(--pink); text-align:center; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+    .section-lead { text-align:center; color:var(--text-muted-custom); font-size:1rem; margin-bottom:40px; line-height:1.5; }
+    .divider { width:40px; height:3px; background:var(--pink); border-radius:2px; margin:0 auto 16px; }
+
+    .what-card { background:#fff; border-radius:20px; padding:28px 24px; border:1.5px solid var(--pink-muted); display:flex; align-items:flex-start; gap:16px; margin-bottom:14px; }
+    .what-icon { flex-shrink:0; width:44px; height:44px; background:var(--pink); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+    .what-card h3 { font-size:1rem; font-weight:700; color:var(--text-body); margin-bottom:4px; }
+    .what-card p { font-size:0.9rem; color:var(--text-muted-custom); line-height:1.5; }
+
+    .how-step { display:flex; align-items:flex-start; gap:16px; padding:0 0 28px; position:relative; }
+    .how-step:not(:last-child)::after { content:''; position:absolute; left:18px; top:44px; bottom:0; width:2px; background:var(--pink-muted); }
+    .step-num { flex-shrink:0; width:38px; height:38px; border-radius:50%; background:var(--pink); color:#fff; font-weight:800; font-size:1rem; display:flex; align-items:center; justify-content:center; z-index:1; }
+    .step-body h3 { font-size:1rem; font-weight:700; color:var(--text-body); margin-bottom:4px; margin-top:8px; }
+    .step-body p { font-size:0.88rem; color:var(--text-muted-custom); line-height:1.5; }
+
+    .occ-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
+    .occ-item { background:#fff; border:1.5px solid var(--pink-muted); border-radius:16px; padding:18px 12px; text-align:center; }
+    .occ-emoji { font-size:1.8rem; margin-bottom:8px; }
+    .occ-item p { font-size:0.82rem; font-weight:600; color:var(--text-body); }
+
+    .price-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+    .price-card { background:#fff; border:1.5px solid var(--pink-muted); border-radius:20px; padding:28px 24px; text-align:center; position:relative; }
+    .price-card.featured { border:2px solid var(--pink); }
+    .price-badge { position:absolute; top:-13px; left:50%; transform:translateX(-50%); background:var(--pink); color:#fff; font-size:0.72rem; font-weight:700; padding:4px 14px; border-radius:20px; white-space:nowrap; letter-spacing:0.5px; text-transform:uppercase; }
+    .price-name { font-size:0.9rem; font-weight:700; color:var(--text-muted-custom); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+    .price-val { font-size:2.8rem; font-weight:900; color:var(--pink); line-height:1; }
+    .price-cur { font-size:1.2rem; font-weight:700; color:var(--pink); vertical-align:super; }
+    .price-desc { font-size:0.85rem; color:var(--text-muted-custom); margin-top:12px; line-height:1.5; }
+    .price-features { list-style:none; text-align:left; margin-top:16px; display:flex; flex-direction:column; gap:7px; }
+    .price-features li { font-size:0.83rem; color:var(--text-body); display:flex; align-items:flex-start; gap:8px; }
+    .price-features li::before { content:'✓'; color:var(--pink); font-weight:700; flex-shrink:0; margin-top:1px; }
+    .price-note { text-align:center; font-size:0.78rem; color:var(--text-muted-custom); margin-top:16px; font-style:italic; }
+
+    .discount-wrap { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:20px; }
+    .discount-card { background:#fff; border:1.5px solid var(--pink-muted); border-radius:16px; padding:20px 18px; position:relative; overflow:hidden; }
+    .discount-card::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--pink); border-radius:4px 0 0 4px; }
+    .discount-card h3 { font-size:0.9rem; font-weight:700; color:var(--pink); margin-bottom:6px; }
+    .discount-card p { font-size:0.83rem; color:var(--text-muted-custom); line-height:1.5; }
+    .discount-no-stack { text-align:center; font-size:0.78rem; color:var(--text-muted-custom); margin-top:4px; font-style:italic; }
+
+    .delivery-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+    .delivery-card { background:#fff; border:1.5px solid var(--pink-muted); border-radius:16px; padding:20px 18px; display:flex; align-items:flex-start; gap:12px; }
+    .delivery-icon { font-size:1.6rem; flex-shrink:0; }
+    .delivery-card h3 { font-size:0.9rem; font-weight:700; color:var(--text-body); margin-bottom:4px; }
+    .delivery-card p { font-size:0.83rem; color:var(--text-muted-custom); line-height:1.5; }
+
+    .order-section { background:var(--pink); padding:64px 20px; }
+    .order-inner { max-width:700px; margin:0 auto; }
+    .order-title { font-size:clamp(1.4rem,5vw,2rem); font-weight:900; color:#fff; text-align:center; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+    .order-sub { text-align:center; color:rgba(255,255,255,0.88); font-size:0.95rem; margin-bottom:36px; }
+    .order-steps { display:flex; flex-direction:column; gap:12px; margin-bottom:28px; }
+    .order-step { background:rgba(255,255,255,0.15); border-radius:14px; padding:16px 20px; display:flex; align-items:flex-start; gap:14px; border:1px solid rgba(255,255,255,0.2); }
+    .order-step-num { flex-shrink:0; width:30px; height:30px; background:#fff; color:var(--pink); border-radius:50%; font-weight:800; font-size:0.9rem; display:flex; align-items:center; justify-content:center; }
+    .order-step-text { font-size:0.88rem; color:#fff; line-height:1.5; }
+    .order-step-text strong { font-size:0.9rem; display:block; margin-bottom:2px; }
+    .copy-block { background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); border-radius:14px; padding:16px 20px; margin-bottom:28px; cursor:pointer; transition:background 0.2s; }
+    .copy-block:hover { background:rgba(255,255,255,0.2); }
+    .copy-label { font-size:0.75rem; font-weight:700; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+    .copy-label span.tag { background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:10px; font-size:0.7rem; }
+    .copy-text { font-size:0.85rem; color:#fff; line-height:1.7; white-space:pre-line; }
+    .copy-hint { text-align:center; font-size:0.78rem; color:rgba(255,255,255,0.65); margin-bottom:20px; }
+    .order-btns { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; }
+
+    .faq-item { border-bottom:1.5px solid var(--pink-muted); padding:16px 0; }
+    .faq-q { font-size:0.95rem; font-weight:700; color:var(--text-body); cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; user-select:none; }
+    .faq-q span.arrow { color:var(--pink); font-size:1.1rem; transition:transform 0.2s; flex-shrink:0; }
+    .faq-q.open span.arrow { transform:rotate(45deg); }
+    .faq-a { font-size:0.88rem; color:var(--text-muted-custom); line-height:1.6; margin-top:10px; display:none; }
+    .faq-a.visible { display:block; }
+
+    .cta-bottom { background:var(--text-body); text-align:center; padding:60px 20px; }
+    .cta-bottom h2 { font-size:clamp(1.4rem,5vw,2rem); font-weight:900; color:#fff; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+    .cta-bottom p { color:rgba(255,255,255,0.7); font-size:0.95rem; margin-bottom:28px; }
+    .cta-btns { display:flex; flex-wrap:wrap; gap:14px; justify-content:center; }
+    .footer-note { text-align:center; font-size:0.78rem; color:var(--text-muted-custom); padding:20px; background:var(--cream); }
+    .bg-white-section { background:#fff; }
+
+    .copied-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#3a1a2e; color:#fff; padding:10px 22px; border-radius:30px; font-size:0.85rem; font-weight:600; opacity:0; transition:opacity 0.3s; pointer-events:none; z-index:999; white-space:nowrap; }
+    .copied-toast.show { opacity:1; }
   </style>
 </head>
 <body>
 
-  <nav class="nav" id="nav">
+  <nav class="nav" id="nav" aria-label="Навигация по странице">
     <div class="nav-inner">
       <div class="nav-logo" onclick="scrollToTop()">FOTON.MAG</div>
       <div class="nav-links">
         <button class="nav-link" onclick="scrollToSection('what')">Что это</button>
         <button class="nav-link" onclick="scrollToSection('how')">Как работает</button>
         <button class="nav-link" onclick="scrollToSection('prices')">Цены</button>
+        <button class="nav-link" onclick="scrollToSection('discounts')">Скидки</button>
         <button class="nav-link" onclick="scrollToSection('order')">Заказать</button>
         <button class="nav-link" onclick="scrollToSection('faq')">FAQ</button>
       </div>
     </div>
   </nav>
 
+  <button class="back-top" id="backTop" onclick="scrollToTop()" aria-label="Наверх">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 15l-6-6-6 6"/>
+    </svg>
+  </button>
+
   <div class="copied-toast" id="toast">Скопировано!</div>
 
   <div id="top" class="hero">
-    <h1 class="hero-title reveal">FOTON.MAG</h1>
-    <p class="reveal reveal-delay-1">Постер с QR-кодом, который хранит твой голос</p>
-    <a href="#" class="btn-white reveal reveal-delay-2" onclick="scrollToSection('order')">Заказать</a>
+    <div class="hero-logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M23 19C23 20.1046 22.1046 21 21 21H3C1.89543 21 1 20.1046 1 19V8C1 6.89543 1.89543 6 3 6H7L9 3H15L17 6H21C22.1046 6 23 6.89543 23 8V19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="12" cy="13" r="4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="hero-badge">Постеры с душой</div>
+    <h1 class="hero-title">FOTON.MAG</h1>
+    <p class="hero-sub">Постер с QR-кодом, который хранит голосовое послание — твоих слов, твоего голоса, твоих чувств</p>
+    <a href="https://www.instagram.com/foton.mag/" target="_blank" class="btn-white">Наш Instagram</a>
+    <div class="scroll-hint" onclick="scrollToSection('what')">
+      <span>Узнать больше</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
   </div>
 
-  <div id="what" class="section">
-    <div class="section-title reveal">Что это такое?</div>
-    <div class="what-card reveal reveal-delay-1"><h3>Красивый постер</h3><p>Стильный А4 с индивидуальным дизайном.</p></div>
-    <div class="what-card reveal reveal-delay-2"><h3>QR-код</h3><p>Сканируешь — слышишь воспоминание.</p></div>
+  <div id="what">
+    <div class="section">
+      <div class="divider reveal"></div>
+      <div class="section-title reveal reveal-delay-1">Что это такое?</div>
+      <p class="section-lead reveal reveal-delay-2">Красивый постер + QR-код + голос. Три вещи, которые вместе делают подарок незабываемым.</p>
+      <div class="what-card reveal reveal-delay-1"><div class="what-icon">🖼️</div><div><h3>Красивый постер</h3><p>Стильный постер формата А4 с индивидуальным дизайном — под тебя, под повод, под человека.</p></div></div>
+      <div class="what-card reveal reveal-delay-2"><div class="what-icon">📱</div><div><h3>QR-код на постере</h3><p>На постере размещён уникальный QR-код. Наводишь камеру — и попадаешь к голосовому посланию.</p></div></div>
+      <div class="what-card reveal reveal-delay-3"><div class="what-icon">🎙️</div><div><h3>Голосовое воспоминание</h3><p>За QR-кодом хранится голосовое сообщение или песня — слова близкого человека, которые можно услышать снова и снова.</p></div></div>
+    </div>
   </div>
 
-  <div id="how" class="section">
-    <div class="section-title reveal">Как работает</div>
-    <div class="how-step reveal reveal-delay-1">1. Пишешь в Telegram.</div>
-    <div class="how-step reveal reveal-delay-2">2. Мы создаем макет.</div>
-    <div class="how-step reveal reveal-delay-3">3. Печатаем и отправляем.</div>
+  <div id="how" class="bg-white-section">
+    <div class="section">
+      <div class="divider reveal"></div>
+      <div class="section-title reveal reveal-delay-1">Как это работает?</div>
+      <p class="section-lead reveal reveal-delay-2">Всего три шага — и подарок готов</p>
+      <div class="how-step reveal reveal-delay-1"><div class="step-num">1</div><div class="step-body"><h3>Пишешь нам в Telegram</h3><p>Присылаешь фото, аудио и ответы на вопросы. Мы обсуждаем детали и согласовываем дизайн.</p></div></div>
+      <div class="how-step reveal reveal-delay-2"><div class="step-num">2</div><div class="step-body"><h3>Оплачиваешь и получаешь макет</h3><p>100% предоплата — после этого формируем заказ и отправляем чек. Для цифрового варианта присылаем макет в высоком качестве.</p></div></div>
+      <div class="how-step reveal reveal-delay-3"><div class="step-num">3</div><div class="step-body"><h3>Получаешь готовый постер</h3><p>Для варианта «в раме» отправляем Европочтой бесплатно по всей Беларуси. Получатель сканирует QR — и слышит твои слова.</p></div></div>
+    </div>
   </div>
 
-  <div id="prices" class="section">
-    <div class="section-title reveal">Цены</div>
-    <div class="price-card reveal reveal-delay-1">Цифровой постер: 30 Br</div>
-    <div class="price-card reveal reveal-delay-2">Постер в раме: 60 Br</div>
+  <div id="occasions" class="section">
+    <div class="divider reveal"></div>
+    <div class="section-title reveal reveal-delay-1">Для каких поводов?</div>
+    <p class="section-lead reveal reveal-delay-2">FotonMag подходит для любого момента, который хочется сохранить навсегда</p>
+    <div class="occ-grid">
+      <div class="occ-item reveal reveal-delay-1"><div class="occ-emoji">💍</div><p>Свадьба и годовщина</p></div>
+      <div class="occ-item reveal reveal-delay-2"><div class="occ-emoji">🎂</div><p>День рождения</p></div>
+      <div class="occ-item reveal reveal-delay-1"><div class="occ-emoji">👶</div><p>Рождение ребёнка</p></div>
+      <div class="occ-item reveal reveal-delay-2"><div class="occ-emoji">🎓</div><p>Выпускной</p></div>
+      <div class="occ-item reveal reveal-delay-3"><div class="occ-emoji">💌</div><p>Признание в любви</p></div>
+      <div class="occ-item reveal reveal-delay-4"><div class="occ-emoji">🌟</div><p>Просто так, от души</p></div>
+    </div>
+  </div>
+
+  <div id="prices" class="bg-white-section">
+    <div class="section">
+      <div class="divider reveal"></div>
+      <div class="section-title reveal reveal-delay-1">Цены</div>
+      <p class="section-lead reveal reveal-delay-2">Формат А4, индивидуальный дизайн в каждом варианте</p>
+      <div class="price-grid">
+        <div class="price-card reveal reveal-delay-1">
+          <div class="price-name">Цифровой постер</div>
+          <div><span class="price-val">30</span><span class="price-cur"> Br</span></div>
+          <div class="price-desc">Вы получаете макет в высоком качестве для самостоятельной печати.</div>
+          <ul class="price-features">
+            <li>Постер А4, индивидуальный дизайн</li>
+            <li>QR-код с голосовым посланием</li>
+            <li>Файл для печати (высокое качество)</li>
+            <li>Готов за 1–2 дня</li>
+          </ul>
+        </div>
+        <div class="price-card featured reveal reveal-delay-2">
+          <div class="price-badge">Готовый подарок</div>
+          <div class="price-name">Постер в раме</div>
+          <div><span class="price-val">60</span><span class="price-cur"> Br</span></div>
+          <div class="price-desc">Вы получаете готовый подарок — остаётся только вручить.</div>
+          <ul class="price-features">
+            <li>Постер А4, индивидуальный дизайн</li>
+            <li>QR-код с голосовым посланием</li>
+            <li>Премиум-печать + рамка (белая/чёрная)</li>
+            <li>Подарочная упаковка и визитка</li>
+            <li>Бумага тишью и защитная пупырка</li>
+          </ul>
+        </div>
+      </div>
+      <p class="price-note reveal">Количество правок уточняйте в Instagram.</p>
+    </div>
+  </div>
+
+  <div id="discounts" class="section">
+    <div class="divider reveal"></div>
+    <div class="section-title reveal reveal-delay-1">Скидки</div>
+    <p class="section-lead reveal reveal-delay-2">Приятные бонусы для новых клиентов и подписчиков</p>
+    <div class="discount-wrap">
+      <div class="discount-card reveal reveal-delay-1"><h3>−10% на первый заказ</h3><p>Скидка 10% на первый заказ — на цифровой постер или постер в раме.</p></div>
+      <div class="discount-card reveal reveal-delay-2"><h3>Промокод от блогера</h3><p>Мы сотрудничаем с блогерами и заведениями. Ищите персональные промокоды на скидку от −10% и выше!</p></div>
+    </div>
+    <p class="discount-no-stack reveal">* Скидки не суммируются.</p>
+  </div>
+
+  <div id="delivery" class="bg-white-section">
+    <div class="section">
+      <div class="divider reveal"></div>
+      <div class="section-title reveal reveal-delay-1">Доставка и оплата</div>
+      <div class="delivery-grid">
+        <div class="delivery-card reveal reveal-delay-1"><div class="delivery-icon">📦</div><div><h3>Бесплатная доставка</h3><p>Отправляем в отделение Европочты по всей Беларуси бесплатно. Надёжная коробка и защитная пупырка — постер доедет целым.</p></div></div>
+        <div class="delivery-card reveal reveal-delay-2"><div class="delivery-icon">💳</div><div><h3>100% предоплата</h3><p>Работаем официально. После оплаты формируем заказ и сразу отправляем чек. Всё прозрачно и надёжно.</p></div></div>
+      </div>
+    </div>
   </div>
 
   <div id="order" class="order-section">
-    <div class="section-title reveal" style="color: #fff;">Заказать</div>
-    <div class="order-step reveal reveal-delay-1" onclick="copyOrder()" style="cursor:pointer;">
-        <strong>Нажми, чтобы скопировать шаблон заказа</strong>
-        <div id="orderText" style="display:none;">Привет! Хочу заказать постер...</div>
+    <div class="order-inner">
+      <div style="width:40px;height:3px;background:rgba(255,255,255,0.4);border-radius:2px;margin:0 auto 16px;" class="reveal"></div>
+      <div class="order-title reveal reveal-delay-1">Оформить заказ</div>
+      <p class="order-sub reveal reveal-delay-2">Напишите нам в Telegram — ответим быстро и поможем с выбором</p>
+      <div class="order-steps">
+        <div class="order-step reveal reveal-delay-1"><div class="order-step-num">1</div><div class="order-step-text"><strong>Выберите вариант</strong>Цифровой постер (30 Br) или Постер в раме (60 Br, цвет рамки: белая/чёрная)</div></div>
+        <div class="order-step reveal reveal-delay-2"><div class="order-step-num">2</div><div class="order-step-text"><strong>Подготовьте материалы</strong>Фото и аудиофайл — голосовое сообщение или песня, которая будет за QR-кодом</div></div>
+        <div class="order-step reveal reveal-delay-3"><div class="order-step-num">3</div><div class="order-step-text"><strong>Выберите референс</strong>Загляните в актуальное «Идеи» в нашем Instagram и скиньте понравившийся пример</div></div>
+        <div class="order-step reveal reveal-delay-4"><div class="order-step-num">4</div><div class="order-step-text"><strong>Оплатите и получите чек</strong>После согласования деталей — 100% предоплата, и мы сразу берёмся за работу</div></div>
+      </div>
+      <div class="copy-block reveal" onclick="copyOrder()">
+        <div class="copy-label"><span>Шаблон заказа</span><span class="tag">Нажми, чтобы скопировать</span></div>
+        <div class="copy-text" id="orderText">1. Вариант: Цифровой / В рамке (белая/чёрная рамка)
+2. Материалы: [прикрепи фото и аудиофайл]
+3. Референс: [ссылка или описание из актуального "Идеи" в Instagram]
+4. Чек об оплате: [прикрепи после согласования]</div>
+      </div>
+      <p class="copy-hint">Или просто напишите в свободной форме — разберёмся вместе 🤍</p>
+      <div class="order-btns reveal">
+        <a href="https://t.me/FotonMag" target="_blank" class="btn-tg">✈ Написать в Telegram</a>
+        <a href="https://www.instagram.com/foton.mag/" target="_blank" class="btn-white" style="color:var(--pink);">Наш Instagram</a>
+      </div>
     </div>
   </div>
 
   <div id="faq" class="section">
-    <div class="section-title reveal">FAQ</div>
-    <div class="faq-item reveal reveal-delay-1">
-      <div class="faq-q" onclick="toggleFaq(this)">Сколько хранится голос? <span>+</span></div>
-      <div class="faq-a">Голос хранится бессрочно.</div>
+    <div class="divider reveal"></div>
+    <div class="section-title reveal reveal-delay-1">Частые вопросы</div>
+    <div id="faqList">
+      <div class="faq-item reveal reveal-delay-1"><div class="faq-q" onclick="toggleFaq(this)"><span>Сколько хранится голосовое послание?</span><span class="arrow">+</span></div><div class="faq-a">Голосовое послание хранится бессрочно — ссылка в QR-коде не истекает. Открывать его можно в любое время и сколько угодно раз.</div></div>
+      <div class="faq-item reveal reveal-delay-2"><div class="faq-q" onclick="toggleFaq(this)"><span>Могут ли другие люди услышать послание?</span><span class="arrow">+</span></div><div class="faq-a">Ссылка уникальная и доступна только тем, у кого есть постер. Мы не публикуем и не передаём голосовые сообщения третьим лицам.</div></div>
+      <div class="faq-item reveal reveal-delay-1"><div class="faq-q" onclick="toggleFaq(this)"><span>Нужно ли устанавливать приложение?</span><span class="arrow">+</span></div><div class="faq-a">Нет. Достаточно навести камеру телефона на QR-код — послание откроется прямо в браузере. Никаких приложений устанавливать не нужно.</div></div>
+      <div class="faq-item reveal reveal-delay-2"><div class="faq-q" onclick="toggleFaq(this)"><span>Как долго делается постер?</span><span class="arrow">+</span></div><div class="faq-a">Обычно 1–2 рабочих дня после оплаты и получения материалов. Если нужно срочно — пишите, разберёмся.</div></div>
+      <div class="faq-item reveal reveal-delay-3"><div class="faq-q" onclick="toggleFaq(this)"><span>Можно ли заменить голосовое послание после оплаты?</span><span class="arrow">+</span></div><div class="faq-a">Нет — QR-код привязан к конкретному аудио, поэтому важно записать послание заранее. Если хочешь несколько посланий — обсуди индивидуально.</div></div>
+      <div class="faq-item reveal reveal-delay-4"><div class="faq-q" onclick="toggleFaq(this)"><span>Как работают скидки?</span><span class="arrow">+</span></div><div class="faq-a">Скидка 10% действует на первый заказ. Также у наших партнёров-блогеров и заведений есть персональные промокоды на скидку от −10% и выше. Скидки не суммируются.</div></div>
     </div>
   </div>
 
+  <div class="cta-bottom">
+    <h2>Подари послание на память</h2>
+    <p>Оформляем заказы в Telegram, примеры работ — в Instagram</p>
+    <div class="cta-btns">
+      <a href="https://t.me/FotonMag" target="_blank" class="btn-tg">✈ Telegram @FotonMag</a>
+      <a href="https://www.instagram.com/foton.mag/" target="_blank" class="btn-white" style="color:var(--text-body);">Наш Instagram</a>
+    </div>
+  </div>
+  <div class="footer-note">© 2025 FotonMag · Беларусь · Налог на профессиональный доход</div>
+
   <script>
-  // Функция плавного скролла с перезапуском анимации
+  const nav = document.getElementById('nav');
+  const backTop = document.getElementById('backTop');
+
+  // Улучшенная функция: сбрасывает и перезапускает анимацию появления
   function scrollToSection(id) {
     const el = document.getElementById(id);
     if (!el) return;
-    
-    // Сбрасываем видимость для анимации
+
+    const offset = 60; // Высота шапки верхнего меню
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+
+    // Ищем все анимируемые элементы внутри нужного раздела
     const reveals = el.querySelectorAll('.reveal');
+
+    // Моментально скрываем элементы без плавного перехода на время прокрутки
     reveals.forEach(r => {
       r.style.transition = 'none';
       r.classList.remove('visible');
-      void r.offsetHeight; // Форсируем перерисовку
-      r.style.transition = ''; 
+      void r.offsetHeight; // Форсируем перерисовку в браузере (reflow)
+      r.style.transition = ''; // Возвращаем стили плавности
     });
 
-    // Плавная прокрутка
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 60, behavior: 'smooth' });
+    // Начинаем скролл к секции
+    window.scrollTo({ top, behavior: 'smooth' });
 
-    // Повторный запуск анимации через 600мс
+    // Ровно в момент приближения к секции запускаем красивую анимацию заново
     setTimeout(() => {
       reveals.forEach(r => r.classList.add('visible'));
-    }, 600); 
+    }, 350); 
   }
 
-  function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-  // Активная навигация
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    document.getElementById('nav').classList.toggle('visible', y > 300);
+    if (y > 300) { nav.classList.add('visible'); backTop.classList.add('show'); }
+    else { nav.classList.remove('visible'); backTop.classList.remove('show'); }
+
+    // Подсветка активной ссылки в навигации при скролле
+    const sections = ['what','how','occasions','prices','discounts','delivery','order','faq'];
+    let current = '';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 120) current = id;
+    });
+    document.querySelectorAll('.nav-link').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('onclick').includes("'" + current + "'"));
+    });
   });
 
-  // Первичный запуск анимации
+  // Первоначальное появление при обычном ручном скролле
   const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    entries.forEach(e => { 
+      if (e.isIntersecting) { 
+        e.target.classList.add('visible'); 
+        observer.unobserve(e.target); // Отключаем слежку после первого появления
+      } 
+    });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-  // FAQ
+  // FAQ аккордеон
   function toggleFaq(el) {
     const ans = el.nextElementSibling;
-    const isVisible = ans.classList.contains('visible');
-    document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('visible'));
-    if (!isVisible) ans.classList.add('visible');
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.faq-q').forEach(q => { q.classList.remove('open'); q.nextElementSibling.classList.remove('visible'); });
+    if (!isOpen) { el.classList.add('open'); ans.classList.add('visible'); }
   }
 
-  // Копирование
+  // Копирование шаблона заказа в буфер обмена
   function copyOrder() {
-    navigator.clipboard.writeText("Привет! Хочу заказать постер...").then(() => {
+    const text = document.getElementById('orderText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
       const t = document.getElementById('toast');
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 2000);
+    }).catch(err => {
+      console.error('Не удалось скопировать текст: ', err);
     });
   }
   </script>
+
 </body>
 </html>
