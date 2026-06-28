@@ -18,7 +18,7 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Arial', sans-serif; background: var(--cream); color: var(--text-body); overflow-x: hidden; }
 
-    /* ── SCROLL ANIMATION — luxury edition ── */
+    /* ── SCROLL ANIMATION ── */
     .reveal {
       opacity: 0;
       transform: translateY(36px);
@@ -260,7 +260,7 @@
     .copied-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(10px); background:#3a1a2e; color:#fff; padding:10px 22px; border-radius:30px; font-size:0.85rem; font-weight:600; opacity:0; transition:opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1); pointer-events:none; z-index:999; white-space:nowrap; }
     .copied-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-    /* ── TOUCH DEVICES: убираем ховеры, они залипают на мобиле ── */
+    /* ── TOUCH DEVICES ── */
     @media (hover: none) and (pointer: coarse) {
       .what-card:hover,
       .occ-item:hover,
@@ -367,7 +367,7 @@
       /* Toast */
       .copied-toast { font-size: 0.78rem; padding: 9px 18px; bottom: 70px; }
 
-      /* Анимация чуть короче на мобиле — не нужна полная 1.1s на маленьком экране */
+      /* Анимация на мобиле */
       .reveal {
         transform: translateY(20px);
         transition:
@@ -518,7 +518,7 @@
           </ul>
         </div>
       </div>
-      <p class="price-note reveal">Количество правок уточняйте в Instagram.</p>
+      <p class="price-note reveal">Количество правок уточняйте!</p>
     </div>
   </div>
 
@@ -609,7 +609,7 @@
   setHeroHeight();
   window.addEventListener('resize', setHeroHeight, { passive: true });
 
-  /* ── Плавный скролл к секции с элегантной задержкой появления ── */
+  /* ── Плавный скролл к секции с задержкой появления ── */
   function scrollToSection(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -628,7 +628,7 @@
 
     window.scrollTo({ top, behavior: 'smooth' });
 
-    // Задержка дольше — чтобы элементы появились уже после прибытия
+    // Задержка дольше — элементы появились после прибытия
     setTimeout(() => {
       reveals.forEach((r, i) => {
         const delay = i * 60;
@@ -668,7 +668,7 @@
     lastScrollY = y;
   }, { passive: true });
 
-  /* ── IntersectionObserver — luxury stagger ── */
+  /* ── IntersectionObserver — stagger ── */
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting) {
